@@ -1,0 +1,134 @@
+[worldserver]
+
+########################################
+# mod-temucraft-checkpoints
+########################################
+#
+#    Temucraft.Checkpoints.Enable
+#        Description: Dungeon checkpoints. Releasing your spirit in a dungeon or raid brings you back at the furthest
+#                     awake checkpoint of your instance instead of the graveyard outside.
+#        Default:     1
+
+Temucraft.Checkpoints.Enable = 1
+
+#
+#    Temucraft.Checkpoints.Entrances
+#        Description: Checkpoints with unlock type 0 (by default one at each dungeon's entrance, inside) are awake
+#                     from the start, so even before the first boss you come back alive inside instead of outside.
+#                     0 = only boss (and walk-past) checkpoints count; before the first one the graveyard is used.
+#        Default:     1
+
+Temucraft.Checkpoints.Entrances = 1
+
+#
+#    Temucraft.Checkpoints.TeleportOnEnter
+#        Description: Entering a run that is past its entrance (a boss checkpoint is awake) takes you straight to the
+#                     furthest awake checkpoint. Not when you log in inside: you stay where you logged out.
+#        Default:     1
+
+Temucraft.Checkpoints.TeleportOnEnter = 1
+
+#
+#    Temucraft.Checkpoints.Resurrect
+#    Temucraft.Checkpoints.HealthPct
+#        Description: 1 = you come back alive (with this much health and mana, no resurrection sickness);
+#                     0 = your ghost is moved to the checkpoint and you still walk to your corpse.
+#        Default:     1, 100
+
+Temucraft.Checkpoints.Resurrect = 1
+Temucraft.Checkpoints.HealthPct = 100
+
+#
+#    Temucraft.Checkpoints.SkipDuringEncounter
+#        Description: 1 = while a boss fight is in progress, releasing works the old way (graveyard outside).
+#        Default:     0
+
+Temucraft.Checkpoints.SkipDuringEncounter = 0
+
+#
+#    Temucraft.Checkpoints.Travel
+#        Description: An awake checkpoint can take you to the other awake checkpoints of the instance (out of combat).
+#        Default:     1
+
+Temucraft.Checkpoints.Travel = 1
+
+#
+#    Temucraft.Checkpoints.MapIcon
+#    Temucraft.Checkpoints.MapIconId
+#        Description: Flags the checkpoint you will come back at on the minimap and world map (a point of interest, as
+#                     a guard's directions show). The icon is an index into the client's POI icons
+#                     (Interface\Minimap\POIIcons): 7 is a flag, 8 a tombstone, 6 a tower.
+#        Default:     1, 7
+
+Temucraft.Checkpoints.MapIcon = 1
+Temucraft.Checkpoints.MapIconId = 7
+
+#
+#    Temucraft.Checkpoints.Announce
+#    Temucraft.Checkpoints.Sound
+#        Description: Tells the whole instance when a checkpoint awakens (centre of the screen and chat), and plays
+#                     this sound (SoundEntries.dbc ID, 0 = none).
+#        Default:     1, 0
+
+Temucraft.Checkpoints.Announce = 1
+Temucraft.Checkpoints.Sound = 0
+
+#
+#    Temucraft.Checkpoints.ProximityRange
+#        Description: Yards for checkpoints that awaken when a player walks past (unlock type 3 with value 0).
+#        Default:     30
+
+Temucraft.Checkpoints.ProximityRange = 30
+
+#
+#    Temucraft.Checkpoints.GameObjectEntry
+#    Temucraft.Checkpoints.DisplayDormant
+#    Temucraft.Checkpoints.DisplayAwake
+#        Description: The gameobject .checkpoint add spawns, and display IDs to show a dormant and an awake checkpoint
+#                     (0 = keep the template's model).
+#        Default:     608200, 0, 0
+
+Temucraft.Checkpoints.GameObjectEntry = 608200
+Temucraft.Checkpoints.DisplayDormant = 0
+Temucraft.Checkpoints.DisplayAwake = 0
+
+########################################
+# Group summon
+########################################
+#
+#    Temucraft.GroupSummon.Enable
+#        Description: When part of your group is in a dungeon or raid and you are out in the world, you get the
+#                     usual summon window. If enough of the group is inside (below), it takes you into their instance
+#                     at its furthest awake checkpoint; otherwise, or if you can't enter (level, lockout, raid group),
+#                     to the meeting stone nearest the dungeon's entrance. .rejoin asks again at once.
+#        Default:     1
+
+Temucraft.GroupSummon.Enable = 1
+
+#
+#    Temucraft.GroupSummon.InsidePercent
+#        Description: Share of the group's online members (you included) that must be inside for the summon to go
+#                     inside. 50 = half or more (in a group of two, your partner alone is enough).
+#        Default:     50
+
+Temucraft.GroupSummon.InsidePercent = 50
+
+#
+#    Temucraft.GroupSummon.CheckInterval
+#    Temucraft.GroupSummon.Cooldown
+#        Description: How often to look (seconds), and how long after an offer before asking again for the same
+#                     instance (seconds). A different instance is offered at once.
+#        Default:     10, 300
+
+Temucraft.GroupSummon.CheckInterval = 10
+Temucraft.GroupSummon.Cooldown = 300
+
+#
+#    Temucraft.GroupSummon.MeetingStones
+#    Temucraft.GroupSummon.StoneRange
+#        Description: Offer the meeting stone when not enough of the group is inside, and how far (yards) from the
+#                     dungeon's entrance a meeting stone may be to count as its stone.
+#        Default:     1, 1500
+
+Temucraft.GroupSummon.MeetingStones = 1
+Temucraft.GroupSummon.StoneRange = 1500
