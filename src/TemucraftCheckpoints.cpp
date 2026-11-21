@@ -73,8 +73,6 @@ namespace
         UNLOCK_ENCOUNTER = 6,   // DungeonEncounter.dbc encounter <value> completed (any kind of boss)
     };
 
-    constexpr uint32 TEXT_DORMANT = 608200;
-    constexpr uint32 TEXT_AWAKE   = 608201;
     constexpr uint32 SENDER_TRAVEL = 1;
 
     struct Checkpoint
@@ -153,6 +151,10 @@ namespace
         float proximity = 30.0f;
         uint32 displayDormant = 0;
         uint32 displayAwake = 0;
+        uint32 textDormant = 608200;
+        uint32 textAwake = 608201;
+        uint32 placedLifetime = 6 * HOUR;
+        float teleportOnEnterRange = 30.0f;
     } cfg;
 
     std::vector<Checkpoint> checkpoints;
@@ -182,6 +184,10 @@ namespace
         cfg.proximity = sConfigMgr->GetOption<float>("Temucraft.Checkpoints.ProximityRange", 30.0f);
         cfg.displayDormant = sConfigMgr->GetOption<uint32>("Temucraft.Checkpoints.DisplayDormant", 0);
         cfg.displayAwake = sConfigMgr->GetOption<uint32>("Temucraft.Checkpoints.DisplayAwake", 0);
+        cfg.textDormant = sConfigMgr->GetOption<uint32>("Temucraft.Checkpoints.TextDormant", 608200);
+        cfg.textAwake = sConfigMgr->GetOption<uint32>("Temucraft.Checkpoints.TextAwake", 608201);
+        cfg.placedLifetime = sConfigMgr->GetOption<uint32>("Temucraft.Checkpoints.PlacedLifetime", 6 * HOUR);
+        cfg.teleportOnEnterRange = sConfigMgr->GetOption<float>("Temucraft.Checkpoints.TeleportOnEnterRange", 30.0f);
     }
 
     void Index()
@@ -503,7 +509,7 @@ namespace
         placed.o = by->GetOrientation();
         p.placed[ws.id] = placed;
         if (GameObject* go = by->SummonGameObject(ws.entry, placed.x, placed.y, placed.z, placed.o, 0.0f, 0.0f,
-                                                  std::sin(placed.o / 2.0f), std::cos(placed.o / 2.0f), 6 * HOUR))
+                                                  std::sin(placed.o / 2.0f), std::cos(placed.o / 2.0f), cfg.placedLifetime))
         {
             summonedStones[go->GetGUID()] = ws.id;
             ApplyVisual(go, true);
@@ -674,7 +680,7 @@ public:
                 // Entering a run that has passed its entrance takes you to the furthest checkpoint (not when you log
                 // in inside: you stay where you logged out)
                 if (cfg.teleportOnEnter && !fromLogin && ws->unlockType != UNLOCK_ALWAYS && !player->IsInCombat() &&
-                    player->GetExactDist(ws->x, ws->y, ws->z) > 30.0f)
+                    player->GetExactDist(ws->x, ws->y, ws->z) > cfg.teleportOnEnterRange)
                     player->NearTeleportTo(ws->x, ws->y, ws->z, ws->o);
                 // Joining a run that already has progress: say where you'd come back
                 if (ws->unlockType != UNLOCK_ALWAYS && cfg.announce)
@@ -757,7 +763,7 @@ public:
         ClearGossipMenuFor(player);
         if (!p.awake.count(ws->id))
         {
-            SendGossipMenuFor(player, TEXT_DORMANT, go->GetGUID());
+            SendGossipMenuFor(player, cfg.textDormant, go->GetGUID());
             return true;
         }
         if (cfg.travel)
@@ -767,7 +773,7 @@ public:
                 if (other.id != ws->id && p.awake.count(other.id))
                     AddGossipItemFor(player, GOSSIP_ICON_TAXI, TemucraftModuleText("mod-temucraft-checkpoints", player, 4, "Travel to " ) + other.name, SENDER_TRAVEL, other.id);
             }
-        SendGossipMenuFor(player, TEXT_AWAKE, go->GetGUID());
+        SendGossipMenuFor(player, cfg.textAwake, go->GetGUID());
         SendMapIcon(player, *ws);
         return true;
     }

@@ -1,4 +1,6 @@
 -- mod-temucraft-checkpoints: dungeon checkpoints
+SET @CheckpointObject := 608200;
+SET @CheckpointText := 608200;
 CREATE TABLE IF NOT EXISTS `mod_temucraft_checkpoint` (
   `id`               INT UNSIGNED      NOT NULL COMMENT 'your own rows: 100000 and up',
   `map`              SMALLINT UNSIGNED NOT NULL,
@@ -20,11 +22,11 @@ CREATE TABLE IF NOT EXISTS `mod_temucraft_checkpoint` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='mod-temucraft-checkpoints';
 
 -- The checkpoint (a meeting stone model; change displayId to taste)
-DELETE FROM `gameobject_template` WHERE `entry` = 608200;
+DELETE FROM `gameobject_template` WHERE `entry` = @CheckpointObject;
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `size`, `AIName`, `ScriptName`, `VerifiedBuild`)
-VALUES (608200, 10, 5491, 'Checkpoint', '', '', '', 0.8, '', '', 0);
+VALUES (@CheckpointObject, 10, 5491, 'Checkpoint', '', '', '', 0.8, '', '', 0);
 
-DELETE FROM `npc_text` WHERE `ID` IN (608200, 608201);
+DELETE FROM `npc_text` WHERE `ID` IN (@CheckpointText, @CheckpointText+1);
 INSERT INTO `npc_text` (`ID`, `text0_0`, `text0_1`, `Probability0`) VALUES
-(608200, 'The checkpoint is dormant. Press on: it will awaken once the way here is safe.', 'The checkpoint is dormant. Press on: it will awaken once the way here is safe.', 1),
-(608201, 'The checkpoint hums with power. Should you fall, you will rise again here.', 'The checkpoint hums with power. Should you fall, you will rise again here.', 1);
+(@CheckpointText, 'The checkpoint is dormant. Press on: it will awaken once the way here is safe.', 'The checkpoint is dormant. Press on: it will awaken once the way here is safe.', 1),
+(@CheckpointText+1, 'The checkpoint hums with power. Should you fall, you will rise again here.', 'The checkpoint hums with power. Should you fall, you will rise again here.', 1);

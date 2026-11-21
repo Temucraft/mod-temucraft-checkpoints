@@ -132,3 +132,38 @@ Temucraft.GroupSummon.Cooldown = 300
 
 Temucraft.GroupSummon.MeetingStones = 1
 Temucraft.GroupSummon.StoneRange = 1500
+
+#
+#    Temucraft.Checkpoints.TextDormant
+#        Description: npc_text shown when a player talks to a checkpoint that is still asleep.
+#        Default:     608200
+
+Temucraft.Checkpoints.TextDormant = 608200
+
+#
+#    Temucraft.Checkpoints.TextAwake
+#        Description: npc_text shown when a player talks to an awakened checkpoint.
+#        Default:     608201
+
+Temucraft.Checkpoints.TextAwake = 608201
+
+#
+#    Temucraft.Checkpoints.PlacedLifetime
+#        Description: Seconds a checkpoint stone placed at a player's position (no fixed spot) stays in the instance.
+#        Default:     21600
+
+Temucraft.Checkpoints.PlacedLifetime = 21600
+
+#
+#    Temucraft.Checkpoints.TeleportOnEnterRange
+#        Description: With TeleportOnEnter, players further than this many yards from the furthest checkpoint are moved to it.
+#        Default:     30
+
+Temucraft.Checkpoints.TeleportOnEnterRange = 30
+
+#
+#    Temucraft.GroupSummon.AtStoneRange
+#        Description: Players already within this many yards of the meeting stone get no summon.
+#        Default:     40
+
+Temucraft.GroupSummon.AtStoneRange = 40

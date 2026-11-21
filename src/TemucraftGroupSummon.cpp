@@ -55,6 +55,7 @@ namespace
         uint32 cooldown = 300;
         bool stones = true;
         float stoneRange = 1500.0f;
+        float atStoneRange = 40.0f;
     } scfg;
 
     std::unordered_map<uint32, Spot> stoneFor;               // dungeon map -> meeting stone outside it
@@ -69,6 +70,7 @@ namespace
         scfg.cooldown = sConfigMgr->GetOption<uint32>("Temucraft.GroupSummon.Cooldown", 300);
         scfg.stones = sConfigMgr->GetOption<bool>("Temucraft.GroupSummon.MeetingStones", true);
         scfg.stoneRange = sConfigMgr->GetOption<float>("Temucraft.GroupSummon.StoneRange", 1500.0f);
+        scfg.atStoneRange = sConfigMgr->GetOption<float>("Temucraft.GroupSummon.AtStoneRange", 40.0f);
     }
 
     // For each dungeon and raid: the meeting stone closest to an area trigger that leads into it from outside
@@ -200,7 +202,7 @@ namespace
         if (stone == stoneFor.end())
             return false;
         Spot const& to = stone->second;
-        if (player->GetMapId() == to.map && player->GetExactDist(to.x, to.y, to.z) < 40.0f)
+        if (player->GetMapId() == to.map && player->GetExactDist(to.x, to.y, to.z) < scfg.atStoneRange)
             return false;
         SendSummon(player, summoner, to);
         ChatHandler(player->GetSession()).PSendSysMessage(TemucraftModuleText("mod-temucraft-checkpoints", player->GetSession(), 18, "|cff66ccff[Group]|r {} of your group {} in {}. Accept the summon to go to the meeting stone outside."),
