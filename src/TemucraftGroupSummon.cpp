@@ -6,7 +6,7 @@
  *   - otherwise, or if you can't enter (level, lockout, raid group), it takes you to the meeting stone nearest the
  *     dungeon's entrance.
  * Declining is fine: you are asked again after Temucraft.GroupSummon.Cooldown seconds, at once if the group moves to
- * another instance, or when you type .rejoin.
+ * another instance, or when you type .temucraft rejoin.
  */
 
 #include "TemucraftCheckpoints.h"
@@ -259,7 +259,7 @@ public:
     {
         static ChatCommandTable commandTable =
         {
-            { "rejoin", HandleRejoin, SEC_PLAYER, Console::No },
+            { "temucraft rejoin", HandleRejoin, 100250, Console::No },
         };
         return commandTable;
     }

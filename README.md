@@ -27,7 +27,7 @@ defaults use this for the 53 bosses that have no spawn point.
 
 `linked` lists creature entries (dead), `b<boss index>` (instance boss DONE) and `c<checkpoint id>` (awake), separated
 by commas or spaces: `3914, 3886, b2` wakes once both creatures are dead and boss 2 is done. Set it with
-`.checkpoint link <id> <all|any> <links>`.
+`.temucraft checkpoint link <id> <all|any> <links>`.
 
 Entering a run that is past its entrance takes you straight to its furthest awake checkpoint (not when you log in
 inside).
@@ -41,20 +41,20 @@ The default rows (418 in 92 dungeons and raids) come from `tools/generate_checkp
 
 ## Commands
 
-- `.checkpoint list` - checkpoints of your map, awake or dormant in your instance, which one you'd come back at
-- `.checkpoint add <unlock type> <unlock value> <name>` - a checkpoint where you stand
-- `.checkpoint import` - gameobjects of a checkpoint entry without a row get one; rows of checkpoints moved with
+- `.temucraft checkpoint list` - checkpoints of your map, awake or dormant in your instance, which one you'd come back at
+- `.temucraft checkpoint add <unlock type> <unlock value> <name>` - a checkpoint where you stand
+- `.temucraft checkpoint import` - gameobjects of a checkpoint entry without a row get one; rows of checkpoints moved with
   `.gobject move` take the gameobject's position
-- `.checkpoint link <id> <all|any> <links>` - wake on several bosses (types 4/5)
-- `.checkpoint wake` - wakes every checkpoint of your instance (testing)
-- `.checkpoint go <id>`, `.checkpoint reload`
+- `.temucraft checkpoint link <id> <all|any> <links>` - wake on several bosses (types 4/5)
+- `.temucraft checkpoint wake` - wakes every checkpoint of your instance (testing)
+- `.temucraft checkpoint go <id>`, `.temucraft checkpoint reload`
 
 ## Group summon
 
 When part of your group is in a dungeon or raid and you are out in the world, you get the usual summon window. With
 half or more of the group's online members inside, it takes you into their instance at its furthest awake checkpoint;
 otherwise (or if you can't enter: level, lockout, raid group) it takes you to the meeting stone nearest the dungeon's
-entrance. Declined offers come back after 5 minutes, at once if the group moves to another instance, or on `.rejoin`.
+entrance. Declined offers come back after 5 minutes, at once if the group moves to another instance, or on `.temucraft rejoin`.
 
 C++ only. Settings: `conf/mod-temucraft-checkpoints.conf.dist`.
 

@@ -14,7 +14,7 @@ INSERT INTO `module_string` (`module`, `id`, `string`) VALUES
 ('mod-temucraft-checkpoints', 11, 'No checkpoints in this instance.'),
 ('mod-temucraft-checkpoints', 12, '{} checkpoints awake in this instance.'),
 ('mod-temucraft-checkpoints', 13, 'No checkpoint {}.'),
-('mod-temucraft-checkpoints', 14, 'Usage: .checkpoint link <id> <all|any> <links>  (creature entries, b<boss index>, c<checkpoint id>)'),
+('mod-temucraft-checkpoints', 14, 'Usage: .temucraft checkpoint link <id> <all|any> <links>  (creature entries, b<boss index>, c<checkpoint id>)'),
 ('mod-temucraft-checkpoints', 15, 'Checkpoint {} now wakes when {} of: {} ({} links).'),
 ('mod-temucraft-checkpoints', 16, 'Checkpoints reloaded: {} rows, {} new spawns (they appear in running instances when their grid loads again).'),
 ('mod-temucraft-checkpoints', 17, '|cff66ccff[Group]|r {} of your group are in {}. Accept the summon to join them.'),

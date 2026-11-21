@@ -84,7 +84,7 @@ Temucraft.Checkpoints.ProximityRange = 30
 #    Temucraft.Checkpoints.GameObjectEntry
 #    Temucraft.Checkpoints.DisplayDormant
 #    Temucraft.Checkpoints.DisplayAwake
-#        Description: The gameobject .checkpoint add spawns, and display IDs to show a dormant and an awake checkpoint
+#        Description: The gameobject .temucraft checkpoint add spawns, and display IDs to show a dormant and an awake checkpoint
 #                     (0 = keep the template's model).
 #        Default:     608200, 0, 0
 
@@ -100,7 +100,7 @@ Temucraft.Checkpoints.DisplayAwake = 0
 #        Description: When part of your group is in a dungeon or raid and you are out in the world, you get the
 #                     usual summon window. If enough of the group is inside (below), it takes you into their instance
 #                     at its furthest awake checkpoint; otherwise, or if you can't enter (level, lockout, raid group),
-#                     to the meeting stone nearest the dungeon's entrance. .rejoin asks again at once.
+#                     to the meeting stone nearest the dungeon's entrance. .temucraft rejoin asks again at once.
 #        Default:     1
 
 Temucraft.GroupSummon.Enable = 1

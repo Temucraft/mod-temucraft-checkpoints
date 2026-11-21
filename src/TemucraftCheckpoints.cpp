@@ -9,20 +9,20 @@
  * picks a gameobject guid, writes the gameobject row and stores the guid back in the checkpoint row. Rows you add
  * by hand only need the map, position and how they wake up.
  *
- *   .checkpoint list            the checkpoints of the map you are on and whether they are awake in your instance
- *   .checkpoint add <unlock type> <unlock value> <name>   a checkpoint where you stand (types below)
- *   .checkpoint import          gameobjects of a checkpoint entry that have no checkpoint row get one, and the rows of
+ *   .temucraft checkpoint list            the checkpoints of the map you are on and whether they are awake in your instance
+ *   .temucraft checkpoint add <unlock type> <unlock value> <name>   a checkpoint where you stand (types below)
+ *   .temucraft checkpoint import          gameobjects of a checkpoint entry that have no checkpoint row get one, and the rows of
  *                             checkpoints moved with .gobject move take the gameobject's position
- *   .checkpoint wake            wakes every checkpoint of your instance (testing)
- *   .checkpoint link <id> <all|any> <links>   wakes when all (or any) of these are met (see unlock types 4 and 5)
- *   .checkpoint go <id>         teleports you to a checkpoint
- *   .checkpoint reload          reads the table again and spawns new rows
+ *   .temucraft checkpoint wake            wakes every checkpoint of your instance (testing)
+ *   .temucraft checkpoint link <id> <all|any> <links>   wakes when all (or any) of these are met (see unlock types 4 and 5)
+ *   .temucraft checkpoint go <id>         teleports you to a checkpoint
+ *   .temucraft checkpoint reload          reads the table again and spawns new rows
  *
  * Unlock types: 0 always awake, 1 awake once creature <value> is dead in the instance (its respawn timer runs, so
  * this survives restarts), 2 awake once the instance script's boss <value> is DONE, 3 awake once a player comes
  * within <value> yards (0: Temucraft.Checkpoints.ProximityRange). Once awake, a checkpoint stays awake until the
  * instance resets. 4 awake once every link in `linked` is met, 5 once any one is: links are creature entries (dead),
- * b<boss index> (DONE) and c<checkpoint id> (awake), e.g. "3914, 3886, b2" - set them with .checkpoint link.
+ * b<boss index> (DONE) and c<checkpoint id> (awake), e.g. "3914, 3886, b2" - set them with .temucraft checkpoint link.
  *
  * 6 awake once DungeonEncounter.dbc encounter <value> is completed (summoned bosses, bosses credited by a spell).
  * A checkpoint at 0, 0, 0 is placed where the group stands when it wakes, with a stone summoned there.
@@ -814,7 +814,7 @@ public:
         };
         static ChatCommandTable commandTable =
         {
-            { "checkpoint", checkpointTable },
+            { "temucraft checkpoint", checkpointTable },
         };
         return commandTable;
     }
@@ -966,14 +966,14 @@ public:
         return true;
     }
 
-    // .checkpoint link <id> <all|any> <links>: e.g. ".checkpoint link 7 all 3914 3886 b2 c5"
+    // .temucraft checkpoint link <id> <all|any> <links>: e.g. ".temucraft checkpoint link 7 all 3914 3886 b2 c5"
     static bool HandleLink(ChatHandler* handler, uint32 id, std::string mode, Tail linkText)
     {
         Checkpoint* ws = FindById(id);
         auto links = ParseLinks(std::string(linkText));
         if (!ws || (mode != "all" && mode != "any") || links.empty())
         {
-            handler->SendSysMessage(TemucraftModuleText("mod-temucraft-checkpoints", handler, 14, "Usage: .checkpoint link <id> <all|any> <links>  (creature entries, b<boss index>, c<checkpoint id>)"));
+            handler->SendSysMessage(TemucraftModuleText("mod-temucraft-checkpoints", handler, 14, "Usage: .temucraft checkpoint link <id> <all|any> <links>  (creature entries, b<boss index>, c<checkpoint id>)"));
             return false;
         }
         std::string text = std::string(linkText);
