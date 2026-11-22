@@ -28,6 +28,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
+#include <mutex>
 #include <unordered_map>
 #include <vector>
 
@@ -35,6 +36,8 @@ using namespace Acore::ChatCommands;
 
 namespace
 {
+    // Temucraft: hooks run on several map threads at once; this lock guards the module's shared state
+    std::recursive_mutex summonLock;
     struct Spot
     {
         uint32 map = 0;
@@ -216,10 +219,11 @@ class TemucraftGroupSummon_World : public WorldScript
 public:
     TemucraftGroupSummon_World() : WorldScript("TemucraftGroupSummon_World") { }
 
-    void OnAfterConfigLoad(bool /*reload*/) override { LoadSummonSettings(); }
+    void OnAfterConfigLoad(bool /*reload*/) override { std::lock_guard<std::recursive_mutex> guard(summonLock); LoadSummonSettings(); }
 
     void OnStartup() override
     {
+        std::lock_guard<std::recursive_mutex> guard(summonLock);
         BuildStones();
         LOG_INFO("server.loading", ">> mod-temucraft-checkpoints: meeting stones found for {} dungeons and raids", stoneFor.size());
     }
@@ -232,6 +236,7 @@ public:
 
     void OnPlayerUpdate(Player* player, uint32 diff) override
     {
+        std::lock_guard<std::recursive_mutex> guard(summonLock);
         if (!scfg.enable)
             return;
         uint32& timer = ticks[player->GetGUID()];
@@ -245,6 +250,7 @@ public:
 
     void OnPlayerLogout(Player* player) override
     {
+        std::lock_guard<std::recursive_mutex> guard(summonLock);
         ticks.erase(player->GetGUID());
         offers.erase(player->GetGUID());
     }
@@ -266,6 +272,7 @@ public:
 
     static bool HandleRejoin(ChatHandler* handler)
     {
+        std::lock_guard<std::recursive_mutex> guard(summonLock);
         if (!scfg.enable)
             return true;
         if (!Check(handler->GetPlayer(), true))

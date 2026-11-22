@@ -54,6 +54,7 @@
 #include <cctype>
 #include <cmath>
 #include <set>
+#include <mutex>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -62,6 +63,8 @@ using namespace Acore::ChatCommands;
 
 namespace
 {
+    // Temucraft: hooks run on several map threads at once; this lock guards the module's shared state
+    std::recursive_mutex stateLock;
     enum UnlockType : uint8
     {
         UNLOCK_ALWAYS    = 0,
@@ -603,6 +606,7 @@ namespace
 
 bool TemucraftFurthestCheckpoint(Map* map, Position& out)
 {
+    std::lock_guard<std::recursive_mutex> guard(stateLock);
     if (!cfg.enable || !map || !map->IsDungeon())
         return false;
     Evaluate(map, nullptr);
@@ -618,16 +622,18 @@ class TemucraftCheckpoints_World : public WorldScript
 public:
     TemucraftCheckpoints_World() : WorldScript("TemucraftCheckpoints_World") { }
 
-    void OnAfterConfigLoad(bool /*reload*/) override { LoadSettings(); }
+    void OnAfterConfigLoad(bool /*reload*/) override { std::lock_guard<std::recursive_mutex> guard(stateLock); LoadSettings(); }
 
     void OnStartup() override
     {
+        std::lock_guard<std::recursive_mutex> guard(stateLock);
         uint32 spawned = LoadCheckpoints();
         LOG_INFO("server.loading", ">> mod-temucraft-checkpoints: {} checkpoints, {} new spawns", checkpoints.size(), spawned);
     }
 
     void OnUpdate(uint32 diff) override
     {
+        std::lock_guard<std::recursive_mutex> guard(stateLock);
         // Forget instances that no longer exist
         _cleanup += diff;
         if (_cleanup < 5 * MINUTE * IN_MILLISECONDS)
@@ -653,6 +659,7 @@ public:
 
     void OnPlayerUpdate(Player* player, uint32 diff) override
     {
+        std::lock_guard<std::recursive_mutex> guard(stateLock);
         if (!cfg.enable)
             return;
         auto& [timer, lastInstance] = playerTick[player->GetGUID()];
@@ -690,10 +697,11 @@ public:
         }
     }
 
-    void OnPlayerLogin(Player* player) override { justLoggedIn.insert(player->GetGUID()); }
+    void OnPlayerLogin(Player* player) override { std::lock_guard<std::recursive_mutex> guard(stateLock); justLoggedIn.insert(player->GetGUID()); }
 
     void OnPlayerLogout(Player* player) override
     {
+        std::lock_guard<std::recursive_mutex> guard(stateLock);
         playerTick.erase(player->GetGUID());
         justLoggedIn.erase(player->GetGUID());
     }
@@ -701,6 +709,7 @@ public:
     // Releasing your spirit in a dungeon brings you back at the furthest awake checkpoint
     bool OnPlayerCanRepopAtGraveyard(Player* player) override
     {
+        std::lock_guard<std::recursive_mutex> guard(stateLock);
         if (!cfg.enable || player->IsAlive())
             return true;
         Map* map = player->GetMap();
@@ -734,6 +743,7 @@ public:
 
     void OnGameObjectAddWorld(GameObject* go) override
     {
+        std::lock_guard<std::recursive_mutex> guard(stateLock);
         if (!entries.count(go->GetEntry()) || !go->GetMap()->IsDungeon())
             return;
         Checkpoint const* ws = FindBySpawn(go->GetSpawnId());
@@ -746,6 +756,7 @@ public:
 
     bool CanGameObjectGossipHello(Player* player, GameObject* go) override
     {
+        std::lock_guard<std::recursive_mutex> guard(stateLock);
         if (!entries.count(go->GetEntry()))
             return false;
         Checkpoint const* ws = FindBySpawn(go->GetSpawnId());
@@ -780,6 +791,7 @@ public:
 
     bool CanGameObjectGossipSelect(Player* player, GameObject* go, uint32 sender, uint32 action) override
     {
+        std::lock_guard<std::recursive_mutex> guard(stateLock);
         if (!entries.count(go->GetEntry()) || sender != SENDER_TRAVEL)
             return false;
         CloseGossipMenuFor(player);
@@ -821,6 +833,7 @@ public:
 
     static bool HandleList(ChatHandler* handler)
     {
+        std::lock_guard<std::recursive_mutex> guard(stateLock);
         Player* player = handler->GetPlayer();
         Map* map = player->GetMap();
         auto itr = byMap.find(map->GetId());
@@ -843,6 +856,7 @@ public:
 
     static bool HandleAdd(ChatHandler* handler, uint8 unlockType, uint32 unlockValue, Tail name)
     {
+        std::lock_guard<std::recursive_mutex> guard(stateLock);
         if (unlockType > UNLOCK_NEARBY)
         {
             handler->SendSysMessage(TemucraftModuleText("mod-temucraft-checkpoints", handler, 7, "Unlock type: 0 always, 1 creature entry dead, 2 boss state done, 3 walk past (value = yards)."));
@@ -889,6 +903,7 @@ public:
 
     static bool HandleImport(ChatHandler* handler)
     {
+        std::lock_guard<std::recursive_mutex> guard(stateLock);
         uint32 added = 0, moved = 0;
         uint32 nextId = 100000;
         for (Checkpoint const& ws : checkpoints)
@@ -938,6 +953,7 @@ public:
 
     static bool HandleWake(ChatHandler* handler)
     {
+        std::lock_guard<std::recursive_mutex> guard(stateLock);
         Map* map = handler->GetPlayer()->GetMap();
         auto itr = byMap.find(map->GetId());
         if (!map->IsDungeon() || itr == byMap.end())
@@ -956,6 +972,7 @@ public:
 
     static bool HandleGo(ChatHandler* handler, uint32 id)
     {
+        std::lock_guard<std::recursive_mutex> guard(stateLock);
         Checkpoint const* ws = FindById(id);
         if (!ws)
         {
@@ -969,6 +986,7 @@ public:
     // .temucraft checkpoint link <id> <all|any> <links>: e.g. ".temucraft checkpoint link 7 all 3914 3886 b2 c5"
     static bool HandleLink(ChatHandler* handler, uint32 id, std::string mode, Tail linkText)
     {
+        std::lock_guard<std::recursive_mutex> guard(stateLock);
         Checkpoint* ws = FindById(id);
         auto links = ParseLinks(std::string(linkText));
         if (!ws || (mode != "all" && mode != "any") || links.empty())
@@ -987,6 +1005,7 @@ public:
 
     static bool HandleReload(ChatHandler* handler)
     {
+        std::lock_guard<std::recursive_mutex> guard(stateLock);
         LoadSettings();
         uint32 spawned = LoadCheckpoints();
         handler->PSendSysMessage(TemucraftModuleText("mod-temucraft-checkpoints", handler, 16, "Checkpoints reloaded: {} rows, {} new spawns (they appear in running instances when their grid loads again)."),
