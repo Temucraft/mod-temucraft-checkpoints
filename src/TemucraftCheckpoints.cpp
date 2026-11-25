@@ -136,7 +136,11 @@ namespace
     // A checkpoint without a position (0, 0, 0) is placed where the group stands when it wakes
     bool IsPlacedAtWake(Checkpoint const& ws) { return ws.x == 0.0f && ws.y == 0.0f && ws.z == 0.0f; }
 
-    std::unordered_map<ObjectGuid, uint32> summonedStones;            // gameobject -> checkpoint id
+    // The checkpoint id of a stone placed at wake is kept on the stone itself (Object::CustomData): object guids
+    // repeat across maps and instance copies, so a global map keyed by them sent one dungeon's stone to another's
+    // checkpoint. The data goes away with the stone.
+    struct PlacedStone : DataMap::Base { uint32 checkpoint = 0; };
+    constexpr char const* PLACED_STONE_KEY = "temucraft_checkpoint_stone";
 
     struct Settings
     {
@@ -514,7 +518,7 @@ namespace
         if (GameObject* go = by->SummonGameObject(ws.entry, placed.x, placed.y, placed.z, placed.o, 0.0f, 0.0f,
                                                   std::sin(placed.o / 2.0f), std::cos(placed.o / 2.0f), cfg.placedLifetime))
         {
-            summonedStones[go->GetGUID()] = ws.id;
+            go->CustomData.GetDefault<PlacedStone>(PLACED_STONE_KEY)->checkpoint = ws.id;
             ApplyVisual(go, true);
         }
         return true;
@@ -761,12 +765,11 @@ public:
             return false;
         Checkpoint const* ws = FindBySpawn(go->GetSpawnId());
         if (!ws)
-        {
-            auto summoned = summonedStones.find(go->GetGUID());
-            ws = summoned != summonedStones.end() ? FindById(summoned->second) : nullptr;
-        }
-        if (!ws || !cfg.enable)
+            if (PlacedStone const* placed = go->CustomData.Get<PlacedStone>(PLACED_STONE_KEY))
+                ws = FindById(placed->checkpoint);
+        if (!ws || !cfg.enable || ws->map != go->GetMapId())
             return false;
+
 
         Map* map = go->GetMap();
         Evaluate(map, player);
