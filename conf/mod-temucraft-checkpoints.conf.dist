@@ -92,6 +92,14 @@ Temucraft.Checkpoints.GameObjectEntry = 608200
 Temucraft.Checkpoints.DisplayDormant = 0
 Temucraft.Checkpoints.DisplayAwake = 0
 
+#
+#    Temucraft.Checkpoints.HideDormant
+#        Description: A checkpoint's stone is hidden (out of every player's phase) until it awakens: nothing to see or
+#                     click in a boss's room before the boss is dead. 0 = dormant stones stand there, dark.
+#        Default:     1
+
+Temucraft.Checkpoints.HideDormant = 1
+
 ########################################
 # Group summon
 ########################################

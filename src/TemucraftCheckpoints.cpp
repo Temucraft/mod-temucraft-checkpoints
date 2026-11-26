@@ -158,6 +158,7 @@ namespace
         float proximity = 30.0f;
         uint32 displayDormant = 0;
         uint32 displayAwake = 0;
+        bool hideDormant = true;
         uint32 textDormant = 608200;
         uint32 textAwake = 608201;
         uint32 placedLifetime = 6 * HOUR;
@@ -191,6 +192,7 @@ namespace
         cfg.proximity = sConfigMgr->GetOption<float>("Temucraft.Checkpoints.ProximityRange", 30.0f);
         cfg.displayDormant = sConfigMgr->GetOption<uint32>("Temucraft.Checkpoints.DisplayDormant", 0);
         cfg.displayAwake = sConfigMgr->GetOption<uint32>("Temucraft.Checkpoints.DisplayAwake", 0);
+        cfg.hideDormant = sConfigMgr->GetOption<bool>("Temucraft.Checkpoints.HideDormant", true);
         cfg.textDormant = sConfigMgr->GetOption<uint32>("Temucraft.Checkpoints.TextDormant", 608200);
         cfg.textAwake = sConfigMgr->GetOption<uint32>("Temucraft.Checkpoints.TextAwake", 608201);
         cfg.placedLifetime = sConfigMgr->GetOption<uint32>("Temucraft.Checkpoints.PlacedLifetime", 6 * HOUR);
@@ -479,8 +481,17 @@ namespace
         player->SendDirectMessage(&data);
     }
 
+    // A dormant checkpoint is out of every player's phase (HideDormant): nothing to see, hover or click before its
+    // boss is dead. Standing in Anub'Rekhan's room before the pull showed his checkpoint's stone (its name at the
+    // tooltip corner, a dormant gossip) as if it could be used.
+    constexpr uint32 PHASEMASK_DORMANT = 0x80000000;
+
     void ApplyVisual(GameObject* go, bool awake)
     {
+        uint32 const shown = go->GetGameObjectData() && go->GetGameObjectData()->phaseMask ? go->GetGameObjectData()->phaseMask : uint32(PHASEMASK_NORMAL);
+        uint32 const phase = (awake || !cfg.hideDormant) ? shown : PHASEMASK_DORMANT;
+        if (go->GetPhaseMask() != phase)
+            go->SetPhaseMask(phase, true);
         go->SetGoState(awake ? GO_STATE_ACTIVE : GO_STATE_READY);
         uint32 display = awake ? cfg.displayAwake : cfg.displayDormant;
         if (display)
@@ -654,6 +665,28 @@ public:
 
 private:
     uint32 _cleanup = 0;
+};
+
+// An instance's progress starts with its map: the core gives a freed instance id out again (a reset run, a new
+// dungeon of the same map within minutes), and the old run's awake checkpoints carried over to the new one, awake
+// before their bosses were pulled. A run kept by a lockout wakes its checkpoints again (quietly) from its saved boss
+// kills and respawn times at the first look.
+class TemucraftCheckpoints_Maps : public AllMapScript
+{
+public:
+    TemucraftCheckpoints_Maps() : AllMapScript("TemucraftCheckpoints_Maps", { ALLMAPHOOK_ON_CREATE_MAP, ALLMAPHOOK_ON_DESTROY_INSTANCE }) { }
+
+    void OnCreateMap(Map* map) override { Forget(map); }
+    void OnDestroyInstance(MapInstanced* /*mapInstanced*/, Map* map) override { Forget(map); }
+
+private:
+    static void Forget(Map* map)
+    {
+        if (!map || !map->Instanceable() || !map->GetInstanceId())
+            return;
+        std::lock_guard<std::recursive_mutex> guard(stateLock);
+        progress.erase(map->GetInstanceId());
+    }
 };
 
 class TemucraftCheckpoints_Player : public PlayerScript
@@ -1023,6 +1056,7 @@ void AddTemucraftCheckpointsScripts()
 {
     AddTemucraftGroupSummonScripts();
     new TemucraftCheckpoints_World();
+    new TemucraftCheckpoints_Maps();
     new TemucraftCheckpoints_Player();
     new TemucraftCheckpoints_GameObject();
     new TemucraftCheckpoints_Commands();

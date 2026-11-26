@@ -2,7 +2,10 @@
 
 Dungeon checkpoints, shared by the whole group: killing a boss gives everyone in that run a new respawn point,
 whether they were there for the kill or not, and so does anyone who enters the run later. Each dungeon and raid has checkpoints: one at the entrance, awake from the start, and one on the
-spawn point of each boss but the last, which awakens when that boss is dead. Releasing your spirit brings you back to
+spawn point of each boss but the last, which awakens when that boss is dead. A checkpoint's stone stays hidden until it awakens
+(`HideDormant`), so nothing stands in a boss's room to use before the boss is dead, and each new run of a dungeon
+starts with only its entrance awake (a reset run used to keep the old run's awake checkpoints when it got the same
+instance id). Releasing your spirit brings you back to
 life at the furthest awake checkpoint of your instance instead of the graveyard outside. When a checkpoint awakens the
 whole instance is told, and the checkpoint you will come back at is flagged on the minimap and world map. Talking to an
 awake checkpoint takes you to the other awake ones.
